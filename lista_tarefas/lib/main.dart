@@ -33,6 +33,32 @@ class _RandomState extends State<Random> {
     return Scaffold(
       appBar: AppBar(),
       body: _buildSuggestions(),
+      floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: (){
+            showDialog(
+                context: context,
+                builder: (BuildContext context){
+                  return const AlertDialog(
+                    title: Text('Alert Title'),
+                    content: TextField(
+                      decoration: InputDecoration(
+                        labelText:'Descripition',
+                      ),
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                          onPressed: null,
+                          child: Text('Confirmar')),
+                      TextButton(
+                          onPressed: null,
+                          child: Text('Cancelar')),
+                    ],
+                  );
+                }
+            );
+          }
+      ),
     );
   }
 
@@ -66,17 +92,4 @@ class _RandomState extends State<Random> {
       ),
     );
   }
-
-  void _showDialog(){
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const AlertDialog(
-          title: Text('Alert Title'),
-          content: Text('Alert body'),
-        );
-      }
-    );
-  }
-
 }
