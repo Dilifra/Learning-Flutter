@@ -17,6 +17,34 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class Tarefas extends StatelessWidget {
+  const Tarefas(
+      {Key? key, required this.text})
+      : super(key: key);
+  final String text;
+  final _biggerFonts = const TextStyle(fontSize: 18);
+  final alreadySaved = true;
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          title: Text(text,
+          style: _biggerFonts,
+          ),
+          trailing: Icon(
+            alreadySaved ? Icons.favorite : Icons.favorite_border,
+            color: alreadySaved ? Colors.red : Colors.blue,
+          )
+        ),
+        const Divider(),
+    ]);
+  }
+}
+
 class Random extends StatefulWidget {
   const Random({Key? key}) : super(key: key);
 
@@ -25,13 +53,26 @@ class Random extends StatefulWidget {
 }
 
 class _RandomState extends State<Random> {
-  final _suggestions = <WordPair> [];
+  final _textController = TextEditingController();
+  final List<Tarefas> _tarefas = [];
+  final _saved = {};
+  final alreadySaved = true;
   final _biggerFonts = const TextStyle(fontSize: 18);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text ('Tarefas'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.list),
+            iconSize: 30,
+            padding: EdgeInsets.only(right:25),
+            onPressed: _pushSaved,
+          )
+        ]
+      ),
       body: _buildSuggestions(),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
@@ -39,20 +80,25 @@ class _RandomState extends State<Random> {
             showDialog(
                 context: context,
                 builder: (BuildContext context){
-                  return const AlertDialog(
-                    title: Text('Alert Title'),
+                  return AlertDialog(
+                    title: const Text('Alert Title'),
                     content: TextField(
-                      decoration: InputDecoration(
+                      controller: _textController,
+                      onSubmitted: _handleSubmitted,
+                      decoration: const InputDecoration(
                         labelText:'Descripition',
                       ),
                     ),
                     actions: <Widget>[
                       TextButton(
-                          onPressed: null,
-                          child: Text('Confirmar')),
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancelar')),
                       TextButton(
-                          onPressed: null,
-                          child: Text('Cancelar')),
+                          onPressed: (){
+                            _handleSubmitted(_textController.text);
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Confirmar')),
                     ],
                   );
                 }
@@ -68,28 +114,46 @@ class _RandomState extends State<Random> {
     return ListView.builder(
       addAutomaticKeepAlives: false,
       padding: const EdgeInsets.all(16),
-      itemBuilder: (BuildContext _context, int i) {
-        if (i.isOdd) {
-          return const Divider();
-        }
-        final int index = i ~/ 2;
-
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
-      },
+      itemBuilder: (_, int index) => _tarefas[index],
+      itemCount: _tarefas.length,
     );
   }
 
-  //Cria os elementos da lista com a função WordPair do pacote english_words
-  Widget _buildRow(WordPair pair){
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        //asPacalCase = UpperCamelCase
-        style: _biggerFonts,
-      ),
+  void _handleSubmitted(String text){
+    _textController.clear();
+    var tarefa = Tarefas (
+      text: text,
+    );
+      setState((){
+        _tarefas.insert(0,tarefa);
+      });
+  }
+  void _pushSaved(){
+    Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (BuildContext context){
+              final tiles = _tarefas.map(
+                  (text) {
+                    return ListTile(
+                      title:Text('text',
+                      style: _biggerFonts ,),
+                    );
+                  },
+              );
+              final divided = ListTile.divideTiles(
+                context: context,
+                tiles: tiles,
+              ).toList();
+
+              return Scaffold(
+                appBar: AppBar(
+                  title:Text('Tarefas Salvas'),
+                ),
+                body: ListView(children:divided),
+              );
+            })
     );
   }
 }
+
+
