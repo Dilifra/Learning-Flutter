@@ -29,12 +29,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  //Criar uma lista de String(textControler não pode ser passado para uma List<Widget>) para armazenar as tarefas
   final List<String> _tarefas = <String>[];
+  //Controlador que armazena o texto, depois de armazenado o texto pode ser usado em outros lugares
   TextEditingController textControler = TextEditingController();
 
+  //Método usado no floatingButton: Abre um diálogo com um textfield e botões para inserir uma tarefa nova na lista
   void _adicionarTarefa(){
     textControler.clear();
 
+    //Botão com Navigator que fecha o Dialog e é chamdo no AlertDialog
     Widget cancelButton = TextButton(
       child: const Text("Cancelar"),
       onPressed: () {
@@ -42,9 +46,10 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
-    //region Função para adicionar o texto na lista
+    //region submitText: Método para adicionar o texto na lista e fechar o Dialog
     submitText(){
       setState(() {
+        //Se o TextField estiver vazio não adiciona uma nova tarefa nem fecha o dialogo
         if(textControler.text.isNotEmpty) {
           _tarefas.add(textControler.text);
           Navigator.of(context).pop();
@@ -52,16 +57,19 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
     }
+    //Método convertido para string para usar no OnSubmitted do TextField
     submitString(String v){
       return submitText();
     }
     //endregion
 
+    //Botão que ativa o método submitText e é chamado no AlertDialog
     Widget addButton = TextButton(
       child: const Text("Adicionar"),
       onPressed: submitText,
     );
 
+    //Contrução do AlertDialog que é chamado no showDialog
     AlertDialog alerta = AlertDialog(
       title: const Text("Informe sua tarefa"),
       content: TextField(
@@ -85,9 +93,11 @@ class _MyHomePageState extends State<MyHomePage> {
     //endregion
   }
 
+  //Método chamado no icone de editar: Abre um Dialog que usa o parametro index para editar o texto da tarefa
   void _editarTarefa(index) {
     textControler.clear();
-    
+
+    //Define o valor do textControler a partir do index da tarefa selecionada para aparecer no TextField do Dialog
     textControler.value = textControler.value.copyWith(
       text: _tarefas[index],
     );
@@ -144,8 +154,10 @@ class _MyHomePageState extends State<MyHomePage> {
     //endregion
   }
 
+  //Método chamado no icone de deletar: Abre um dialogo de confirmação e deleta tarefa pelo index
   void deleteDialog(index) {
 
+    //Fecha dialog
     TextButton naoDeletar = TextButton(
         onPressed: ()=> Navigator.of(context).pop(),
         child: const Text('Cancelar')
@@ -154,6 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
     TextButton deletar = TextButton(
         onPressed: (){
           setState(() {
+            //Remove tarefa selecionada
             _tarefas.removeAt(index);
           });
           Navigator.of(context).pop();
@@ -161,6 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Text('Deletar')
     );
 
+    //region Mostra Dialog pra confirmar deletação
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -173,10 +187,13 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
     );
+    //endregion
   }
 
+  //Class Card que faz a construção do item da lista e seus botões
   Card createList(index){
 
+    //region IconButtons de editar e deletar usados no trailing da listTile
     IconButton editButton = IconButton(
         onPressed: (){
           _editarTarefa(index);
@@ -189,10 +206,13 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         icon: const Icon(Icons.delete),
     );
+    //endregion
 
     return Card(
       child: ListTile(
+        //quando uma nova tarefa é adionada na lista é mostrada com base no index
           title: Text(_tarefas[index]),
+          //Row permite botar dois botões
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -213,6 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: ListView.builder(
           itemCount: _tarefas.length,
+          //Passa o parametro index para o Card que cria o item da lista
           itemBuilder: (context,index) => createList(index),
         ),
       ),
